@@ -1,0 +1,5 @@
+# Ansible Galaxy Requirements. Docker is include for instructive purposes.
+
+# - src: git@git.com:ansible-docker.git
+#   scm: git
+#   version: master

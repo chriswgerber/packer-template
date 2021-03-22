@@ -1,0 +1,139 @@
+description: This is a base Amazon Linux Image.
+min_packer_version: 1.2.3
+
+
+variables:
+  image_name: base_image
+  os_platform: amazon-linux
+  aws_region: us-east-1
+  vpc_id:
+  subnet_id:
+  security_group_id:
+  instance_role:
+  ssh_key_filename: id_rsa
+  instance_action_on_failure: terminate
+  home: "{{env `HOME`}}"
+  # chc_aws_acct_id: "822825227953"
+  # dev_aws_acct_id: "006919865296"
+  # prod_aws_acct_id: "267912818664"
+
+
+builders:
+
+  - type: amazon-ebs
+    ami_name: "{{user `image_name`}}/{{user `os_platform`}}-{{isotime \"2006-01-02_15.04.05\"}}"
+    communicator: ssh
+    ssh_keypair_name: "{{user `ssh_key_filename`}}"
+    ssh_private_key_file: "{{user `home`}}/.ssh/dev/{{user `ssh_key_filename`}}"
+    ssh_username: ec2-user
+    ssh_interface: private_ip
+    instance_type: m5.large
+    region: "{{user `aws_region`}}"
+    vpc_id: "{{user `vpc_id`}}"
+    subnet_id: "{{user `subnet_id`}}"
+    security_group_id: "{{user `security_group_id`}}"
+    source_ami_filter:
+      filters:
+        virtualization-type: hvm
+        name: base-linux.amazon.hvm.x86_64.v*
+        root-device-type: ebs
+      owners:
+        - "{{user `chc_aws_acct_id`}}"
+      most_recent: true
+    ami_virtualization_type: hvm
+    ami_regions:
+      - "{{user `aws_region`}}"
+    associate_public_ip_address: false
+    iam_instance_profile: "{{user `instance_role`}}"
+    shutdown_behavior: "{{user `instance_action_on_failure`}}"
+    user_data_file: "{{ template_dir }}/user_data.sh"
+    ena_support: true
+    ebs_optimized: true
+    # encrypt_boot: True
+    launch_block_device_mappings:
+      - device_name: /dev/xvda
+        volume_size: 50
+        volume_type: gp2
+        delete_on_termination: true
+    tags:
+      OSVersion: AmazonLinux
+      BuildDate: "{{ timestamp }}"
+      BuildRegion: "{{ .BuildRegion }}"
+      SourceAMIId: "{{ .SourceAMI }}"
+      SourceAMIName: "{{ .SourceAMIName }}"
+      Ephemeral: "FALSE"
+    run_tags:
+      Name: packer-testbuild
+      Ephemeral: "TRUE"
+    run_volume_tags:
+      Name: packer-testbuild
+      Ephemeral: "TRUE"
+    snapshot_tags:
+      Name: packer-testbuild
+      Ephemeral: "FALSE"
+
+
+provisioners:
+
+  # Setup Ansible
+  - type: shell
+    inline:
+      - sudo yum --enablerepo=epel install ansible
+
+  # Run Ansible
+  - type: ansible-local
+    command: >-
+      ANSIBLE_FORCE_COLOR=1
+      PYTHONUNBUFFERED=1
+      sudo /usr/local/bin/ansible-playbook
+      -vv
+    inventory_groups: base
+    playbook_file: default.yml
+    role_paths: roles
+    group_vars: group_vars
+    clean_staging_directory: true
+
+  # Setup Inspec
+
+  # - type: shell
+  #   inline:
+  #     - |
+  #       echo "Prepare Inspec"
+  #       aws s3 cp s3://bucket-name/inspec.rpm /tmp/inspec.rpm
+  #       sudo yum install /tmp/inspec.rpm -y
+  #       mkdir -p /tmp/inspec-tests/apsd-common
+  #       inspec detect
+
+  # # Import Tests
+  # - type: file
+  #   source: test/integration/default/
+  #   destination: /tmp/inspec-tests/common
+
+  # # Run Inspec
+  # - type: shell
+  #   inline:
+  #     - >-
+  #       sudo inspec exec
+  #       /tmp/inspec-tests/common
+  #       --attrs /tmp/inspec-tests/common/files/attributes.yml
+  #       --vendor-cache /tmp/inspec-tests/common/vendor
+  #       --no-create-lockfile
+  #       --backend=local
+
+  # Reset
+  - type: shell
+    inline:
+      - |
+        sudo yum uninstall inspec -y
+        sudo rm -rf /tmp/inspec-tests
+
+  # Force fail to prevent AMI.
+  - type: shell
+    inline:
+      - 'false'
+
+
+post-processors:
+
+    - type: manifest
+      output: base-build-manifest.json

@@ -1,0 +1,45 @@
+
+cis_benchmarks:
+
+  to_be_implemented:
+    - '1.1.2'   # Create separate partition for /tmp
+    - '1.1.3'   # Set nodev on /tmp
+    - '1.1.4'   # Set nosuid on /tmp
+    - '1.1.5'   # Set noexec on /tmp
+    - '1.1.6'   # Create separate partition for /var
+    - '1.1.7'   # Create separate partition for /var/tmp
+    - '1.1.8'   # Set nodev on /var/tmp
+    - '1.1.9'   # Set nosuid on /var/tmp
+    - '1.1.10'  # Set noexec on /var/tmp
+    - '1.1.11'  # Create separate partition for /var/log
+    - '1.1.12'  # Create separate partition for /var/log/audit
+    - '1.1.13'  # Create separate partition for /home
+    - '1.1.14'  # Set nodev on /home
+    - '1.6.3'   # Install SELinux or AppArmor
+    - '3.6.3'   # Allow only local on loopback
+    - '4.1.6'   # Log all system changes
+    - '4.1.8'   # Log all login/logout events
+    - '4.1.9'   # Ensure session initiation information is collected
+    - '4.2.4'   # All log files should be 0600
+    - '5.6'     # Restrict access to su command
+    - '6.1.3'   # Configure perms on /etc/shadow
+    - '6.1.5'   # Configure perms on /etc/gshadow
+
+  # Many of these will fail on Cloud OS', so they're disabled. Others are managed
+  # by other means or outside of our control.
+  will_not_implement:
+    - '1.3.1'   # Install AIDE
+    - '1.3.2'   # Set AIDE on Cron
+    - '1.4.2'   # Password on GRUB loader
+    - '1.5.2'   # Verified with separate test
+    - '1.6.1.2' # SELinux is running
+    - '1.6.1.3' # SELinux is configured
+    - '3.3.3'   # Disable IPv6
+    - '3.4.3'   # /etc/hosts.deny ALL
+    - '3.6.2'   # Set iptables default deny policies
+    - '3.6.4'   # Drop all traffic not explicitly allowed
+    - '3.6.5'   # Iptables rules on all open ports
+    - '4.1.1.2' # Disable system when audit log full
+    - '4.1.1.3' # Prevent audit logs from being deleted.
+    - '5.3.1'   # Set requirements on passwords
+    - '5.3.3'   # Limit password reuse

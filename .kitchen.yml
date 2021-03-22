@@ -1,0 +1,31 @@
+---
+driver:
+    name: vagrant
+
+provisioner:
+    name: ansible_playbook
+    require_chef_for_busser: false
+    require_ruby_for_busser: false
+    ansible_verbosity: 2
+    ansible_verbose: true
+
+verifier:
+    name: inspec
+    ruby_bindir: '/usr/bin'
+    backend_cache: true
+
+platforms:
+
+    - name: centos-6
+      driver:
+         box: centos/6
+         platform: centos
+
+suites:
+
+    - name: default
+      provisioner:
+          hosts: base
+      verifier:
+        attrs:
+          - test/integration/default/files/attributes.yml

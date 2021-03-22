@@ -1,0 +1,60 @@
+---
+driver:
+    name: ec2
+    associate_public_ip: false
+    availability_zone: b
+    aws_ssh_key_id:
+    ebs_optimized: true
+    iam_profile_name:
+    interface: private
+    instance_type: m4.large
+    region: us-east-1
+    require_chef_omnibus: false
+    security_group_ids:
+        -
+    subnet_filter:
+        tag:   'Name'
+        value:
+    tags:
+        Name: Test-Kitchen-Instance
+        CreatedBy: test-kitchen
+        Ephemeral: "TRUE"
+
+transport:
+    name: ssh
+    username: ec2-user
+    ssh_key:
+    compression: true
+    max_ssh_sessions: 1
+
+provisioner:
+    require_ansible_omnibus: false
+    # This command is used to install ansible on the system.
+    # custom_pre_install_command: sudo pip install ansible --index-url
+    ansible_binary_path: /usr/local/bin
+
+platforms:
+
+    - name: base-amzl
+      driver:
+          image_search:
+              owner-id: # Account ID
+              name: base-linux.amazon.hvm.x86_64.v*
+              root-device-type: ebs
+              virtualization-type: hvm
+          block_device_mappings:
+              - device_name: /dev/xvda
+                ebs:
+                    volume_size: 200
+                    delete_on_termination: true
+
+suites:
+
+    - name: default
+      provisioner:
+          hosts: base
+      verifier:
+        attrs:
+          - test/integration/default/files/attributes.yml
+      includes:
+        - base-amzl

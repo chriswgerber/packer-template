@@ -1,0 +1,9 @@
+/.bundle/
+/bundle/
+/.kitchen/
+/build/
+vendor/
+
+# Externally defined roles that are imported by the Makefile.
+# Docker left in for example.
+/roles/ansible-docker
