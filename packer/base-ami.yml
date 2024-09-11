@@ -13,9 +13,7 @@ variables:
   ssh_key_filename: id_rsa
   instance_action_on_failure: terminate
   home: "{{env `HOME`}}"
-  # chc_aws_acct_id: "822825227953"
-  # dev_aws_acct_id: "006919865296"
-  # prod_aws_acct_id: "267912818664"
+  aws_acct_id: "123456789012"
 
 
 builders:
@@ -24,7 +22,7 @@ builders:
     ami_name: "{{user `image_name`}}/{{user `os_platform`}}-{{isotime \"2006-01-02_15.04.05\"}}"
     communicator: ssh
     ssh_keypair_name: "{{user `ssh_key_filename`}}"
-    ssh_private_key_file: "{{user `home`}}/.ssh/dev/{{user `ssh_key_filename`}}"
+    ssh_private_key_file: "{{user `home`}}/.ssh/{{user `ssh_key_filename`}}"
     ssh_username: ec2-user
     ssh_interface: private_ip
     instance_type: m5.large
@@ -38,7 +36,7 @@ builders:
         name: base-linux.amazon.hvm.x86_64.v*
         root-device-type: ebs
       owners:
-        - "{{user `chc_aws_acct_id`}}"
+        - "{{user `aws_acct_id`}}"
       most_recent: true
     ami_virtualization_type: hvm
     ami_regions:
@@ -101,7 +99,7 @@ provisioners:
   #       echo "Prepare Inspec"
   #       aws s3 cp s3://bucket-name/inspec.rpm /tmp/inspec.rpm
   #       sudo yum install /tmp/inspec.rpm -y
-  #       mkdir -p /tmp/inspec-tests/apsd-common
+  #       mkdir -p /tmp/inspec-tests/common
   #       inspec detect
 
   # # Import Tests
